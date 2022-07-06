@@ -1,0 +1,30 @@
+#!/usr/bin/python3
+
+import argparse
+import os
+from subprocess import check_output
+
+current_user = os.environ.get("USER")
+
+
+def parse_opts():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--server", dest="host", required=True)
+    parser.add_argument("-u", "--user", dest="user", default=current_user, required=False)
+    parser.add_argument("-rp", "--remote-port", dest="remote_port", required=True)
+    parser.add_argument("-lp", "--local-port", dest="local_port", required=False, default=None)
+    parser.add_argument("-k", "--key", dest="ssh_key", default="~/.ssh/id_rsa", required=False)
+
+    return parser.parse_args()
+
+
+def main():
+    args = parse_opts()
+    if not args.local_port:
+        args.local_port = args.remote_port
+    command = ["ssh", "-i", f"{args.ssh_key}", "-L", f"59{args.remote_port}:127.0.0.1:59{args.local_port}", "-N", "-f",
+               "-l", args.user, args.host]
+    check_output(command)
+
+
+main()
